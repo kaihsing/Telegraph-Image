@@ -27,7 +27,7 @@ export async function onRequestPost(context) {
                 const telegramFormData = new FormData();
                 telegramFormData.append("chat_id", env.TG_Chat_ID);
 
-                // 根據文件類型選擇合適的上傳方式
+                // 根據檔案類型選擇合適的上傳方式
                 let apiEndpoint;
                 if (uploadFile.type.startsWith('image/')) {
                     telegramFormData.append("photo", uploadFile);

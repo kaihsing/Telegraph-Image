@@ -10,7 +10,7 @@ export async function onRequest(context) {
     // 如果记录不存在
     if (!value.metadata) return new Response(`Image metadata not found for ID: ${params.id}`, { status: 404 });
 
-    // 更新文件名
+    // 更新檔案名
     value.metadata.fileName = params.name;
     await env.img_url.put(params.id, "", { metadata: value.metadata });
 

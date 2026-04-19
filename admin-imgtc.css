@@ -143,7 +143,7 @@ body {
   flex-grow: 1;
 }
 
-/* 图片卡片样式 */
+/* 圖片卡片样式 */
 .image-card {
   width: 100%;
   aspect-ratio: 4 / 3;
@@ -261,13 +261,13 @@ body {
 }
 
 .footer a {
-  color: #555; /* 链接颜色 */
+  color: #555; /* 網址颜色 */
   text-decoration: none;
   transition: color 0.3s ease;
 }
 
 .footer a:hover {
-  color: #333; /* 悬停时的链接颜色改为黑色 */
+  color: #333; /* 悬停时的網址颜色改为黑色 */
 }
 
 .footer i {
@@ -290,7 +290,7 @@ body {
   .header-content .actions i{margin: 0 4px;}
 }
 
-/* 音视频卡片基础样式 */
+/* 音影片卡片基础样式 */
 .video-card, .audio-card, .file-card {
   background: linear-gradient(135deg, #8a4bffd9 0%, #6d82ffd9 100%);
   border: none;

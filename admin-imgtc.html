@@ -49,7 +49,7 @@
                 <el-dropdown-menu slot="dropdown">
                   <el-dropdown-item command="all" :class="{ 'el-dropdown-menu__item--selected': filterOption === 'all' }"><i class="fas fa-filter"></i> 全部</el-dropdown-item>
                   <el-dropdown-item command="favorites" :class="{ 'el-dropdown-menu__item--selected': filterOption === 'favorites' }"><i class="fas fa-bookmark"></i> 收藏</el-dropdown-item>
-                  <el-dropdown-item command="blocked" :class="{ 'el-dropdown-menu__item--selected': filterOption === 'blocked' }"><i class="fas fa-lock"></i> 黑名单</el-dropdown-item>
+                  <el-dropdown-item command="blocked" :class="{ 'el-dropdown-menu__item--selected': filterOption === 'blocked' }"><i class="fas fa-lock"></i> 黑名單</el-dropdown-item>
                   <el-dropdown-item command="unblocked" :class="{ 'el-dropdown-menu__item--selected': filterOption === 'unblocked' }"><i class="fas fa-unlock"></i> 白名單</el-dropdown-item>
                   <el-dropdown-item command="adult" :class="{ 'el-dropdown-menu__item--selected': filterOption === 'adult' }"><i class="fas fa-user-secret"></i> NSFW</el-dropdown-item>
                 </el-dropdown-menu>
@@ -62,7 +62,7 @@
                   <el-dropdown-item command="copy" :class="{ disabled: selectedFiles.length === 0 }"><i class="fas fa-link"></i> 批量複製</el-dropdown-item>
                   <el-dropdown-item command="delete" :class="{ disabled: selectedFiles.length === 0 }"><i class="fas fa-trash-alt"></i> 批量删除</el-dropdown-item>
                   <el-dropdown-item command="download" :class="{ disabled: selectedFiles.length === 0 }"><i class="fas fa-download"></i> 批量下载</el-dropdown-item>
-                  <el-dropdown-item command="block" :class="{ disabled: selectedFiles.length === 0 }"><i class="fas fa-lock"></i> 加入黑名单</el-dropdown-item>
+                  <el-dropdown-item command="block" :class="{ disabled: selectedFiles.length === 0 }"><i class="fas fa-lock"></i> 加入黑名單</el-dropdown-item>
                   <el-dropdown-item command="unblock" :class="{ disabled: selectedFiles.length === 0 }"><i class="fas fa-unlock"></i> 加入白名單</el-dropdown-item>
                 </el-dropdown-menu>
               </el-dropdown>
@@ -373,7 +373,7 @@
       refreshDashboard() {location.reload();},  // 刷新页面
       handleLogout() { window.location.href = '/'; },  // 退出登录
       handlePageChange(page) { this.currentPage = page; },  // 切换页面
-      handleUpload() { this.$refs.fileInput.click(); },  // 打开檔案选择对话框
+      handleUpload() { this.$refs.fileInput.click(); },  // 打开檔案選擇对话框
       sort(command) { this.sortOption = command; },  // 切换排序方式
       filter(command) { this.filterOption = command; },  // 切换筛选方式
       sortData(data) {
@@ -621,7 +621,7 @@
       },
       handleBatchBlockOrUnblock(type) {  // 批量加入黑/白名單
         if (type !== 'Block' && type !== 'White') { this.$message.error('无效的操作类型'); return; }
-        const typeToName = { Block: '黑名单', White: '白名單' };
+        const typeToName = { Block: '黑名單', White: '白名單' };
         this.$confirm(`确定要将这 ${this.selectedFiles.length} 个檔案加入${typeToName[type]}吗?`, '提示', {
           confirmButtonText: '确定',
           cancelButtonText: '取消',
@@ -646,7 +646,7 @@
         });
       },
       handleBatchOperation(command) {
-        if (this.selectedFiles.length === 0) { this.$message.warning('请先选择檔案'); return; }
+        if (this.selectedFiles.length === 0) { this.$message.warning('请先選擇檔案'); return; }
         switch (command) {
           case 'copy': this.handleBatchCopy(); break;
           case 'delete': this.handleBatchDelete(); break;
@@ -736,7 +736,7 @@
           message: `
             <div>
               每行一个网站，格式：名称|网址|图标类名<br>
-              图标需在 <a href="https://fontawesome.com/v6/search?m=free" target="_blank" style="color: #409EFF; text-decoration: underline">Font Awesome</a> 中选择
+              图标需在 <a href="https://fontawesome.com/v6/search?m=free" target="_blank" style="color: #409EFF; text-decoration: underline">Font Awesome</a> 中選擇
             </div>
           `,
           inputValidator: (value) => {
@@ -817,7 +817,7 @@
               this.$message.error('檔案名修改失敗');
             }
           })
-          .catch(() => this.$message.error('修改檔案名时出错，请检查网络连接'));
+          .catch(() => this.$message.error('修改檔案名时出錯，请检查网络连接'));
         }).catch(() => {});
       }
     },
@@ -827,7 +827,7 @@
       fetch("./api/manage/check", { method: 'GET', credentials: 'include' })
         .then(response => response.text())
         .then(result => result === "true" ? this.showLogoutButton = true : window.location.href = "./api/manage/login")
-        .catch(() => this.$message.error('同步数据时出错，请检查网络连接'));
+        .catch(() => this.$message.error('同步数据时出錯，请检查网络连接'));
 
       // 获取檔案列表数据
       fetch("./api/manage/list", { method: 'GET', credentials: 'include' })
@@ -851,7 +851,7 @@
           this.fileType = localStorage.getItem('fileType') || this.fileType;
           this.switchFileType(this.fileType);
         })
-        .catch(() => this.$message.error('同步数据时出错，请检查网络连接'));
+        .catch(() => this.$message.error('同步数据时出錯，请检查网络连接'));
 
       if (localStorage.getItem('quickWebsites')) {
         this.quickWebsites = JSON.parse(localStorage.getItem('quickWebsites'));
