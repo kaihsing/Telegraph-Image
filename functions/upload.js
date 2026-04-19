@@ -10,6 +10,10 @@ export async function onRequestPost(context) {
         await errorHandling(context);
         telemetryData(context);
 
+        if (!env.TG_Bot_Token || !env.TG_Chat_ID) {
+            throw new Error('未配置 TG_Bot_Token 或 TG_Chat_ID 环境变量');
+        }
+
         const uploadFile = formData.get('file');
         if (!uploadFile) {
             throw new Error('No file uploaded');
