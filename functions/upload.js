@@ -10,61 +10,74 @@ export async function onRequestPost(context) {
         await errorHandling(context);
         telemetryData(context);
 
-        const uploadFile = formData.get('file');
-        if (!uploadFile) {
-            throw new Error('No file uploaded');
+        // 獲取所有上傳的檔案
+        const uploadFiles = formData.getAll('file');
+        if (uploadFiles.length === 0) {
+            throw new Error('No files uploaded');
         }
 
-        const fileName = uploadFile.name;
-        const fileExtension = fileName.split('.').pop().toLowerCase();
+        const results = [];
 
-        const telegramFormData = new FormData();
-        telegramFormData.append("chat_id", env.TG_Chat_ID);
+        // 循環處理每個檔案
+        for (const uploadFile of uploadFiles) {
+            try {
+                const fileName = uploadFile.name;
+                const fileExtension = fileName.split('.').pop().toLowerCase();
 
-        // 根据文件类型选择合适的上传方式
-        let apiEndpoint;
-        if (uploadFile.type.startsWith('image/')) {
-            telegramFormData.append("photo", uploadFile);
-            apiEndpoint = 'sendPhoto';
-        } else if (uploadFile.type.startsWith('audio/')) {
-            telegramFormData.append("audio", uploadFile);
-            apiEndpoint = 'sendAudio';
-        } else if (uploadFile.type.startsWith('video/')) {
-            telegramFormData.append("video", uploadFile);
-            apiEndpoint = 'sendVideo';
-        } else {
-            telegramFormData.append("document", uploadFile);
-            apiEndpoint = 'sendDocument';
-        }
+                const telegramFormData = new FormData();
+                telegramFormData.append("chat_id", env.TG_Chat_ID);
 
-        const result = await sendToTelegram(telegramFormData, apiEndpoint, env);
-
-        if (!result.success) {
-            throw new Error(result.error);
-        }
-
-        const fileId = getFileId(result.data);
-
-        if (!fileId) {
-            throw new Error('Failed to get file ID');
-        }
-
-        // 将文件信息保存到 KV 存储
-        if (env.img_url) {
-            await env.img_url.put(`${fileId}.${fileExtension}`, "", {
-                metadata: {
-                    TimeStamp: Date.now(),
-                    ListType: "None",
-                    Label: "None",
-                    liked: false,
-                    fileName: fileName,
-                    fileSize: uploadFile.size,
+                // 根據文件類型選擇合適的上傳方式
+                let apiEndpoint;
+                if (uploadFile.type.startsWith('image/')) {
+                    telegramFormData.append("photo", uploadFile);
+                    apiEndpoint = 'sendPhoto';
+                } else if (uploadFile.type.startsWith('audio/')) {
+                    telegramFormData.append("audio", uploadFile);
+                    apiEndpoint = 'sendAudio';
+                } else if (uploadFile.type.startsWith('video/')) {
+                    telegramFormData.append("video", uploadFile);
+                    apiEndpoint = 'sendVideo';
+                } else {
+                    telegramFormData.append("document", uploadFile);
+                    apiEndpoint = 'sendDocument';
                 }
-            });
+
+                const result = await sendToTelegram(telegramFormData, apiEndpoint, env);
+
+                if (!result.success) {
+                    results.push({ error: `File ${fileName} failed: ${result.error}` });
+                    continue;
+                }
+
+                const fileId = getFileId(result.data);
+                if (!fileId) {
+                    results.push({ error: `Failed to get ID for ${fileName}` });
+                    continue;
+                }
+
+                // 保存到 KV
+                if (env.img_url) {
+                    await env.img_url.put(`${fileId}.${fileExtension}`, "", {
+                        metadata: {
+                            TimeStamp: Date.now(),
+                            ListType: "None",
+                            Label: "None",
+                            liked: false,
+                            fileName: fileName,
+                            fileSize: uploadFile.size,
+                        }
+                    });
+                }
+
+                results.push({ 'src': `/file/${fileId}.${fileExtension}` });
+            } catch (fileError) {
+                results.push({ error: fileError.message });
+            }
         }
 
         return new Response(
-            JSON.stringify([{ 'src': `/file/${fileId}.${fileExtension}` }]),
+            JSON.stringify(results),
             {
                 status: 200,
                 headers: { 'Content-Type': 'application/json' }
@@ -110,9 +123,7 @@ async function sendToTelegram(formData, apiEndpoint, env, retryCount = 0) {
             return { success: true, data: responseData };
         }
 
-        // 图片上传失败时转为文档方式重试
         if (retryCount < MAX_RETRIES && apiEndpoint === 'sendPhoto') {
-            console.log('Retrying image as document...');
             const newFormData = new FormData();
             newFormData.append('chat_id', formData.get('chat_id'));
             newFormData.append('document', formData.get('photo'));
@@ -124,7 +135,6 @@ async function sendToTelegram(formData, apiEndpoint, env, retryCount = 0) {
             error: responseData.description || 'Upload to Telegram failed'
         };
     } catch (error) {
-        console.error('Network error:', error);
         if (retryCount < MAX_RETRIES) {
             await new Promise(resolve => setTimeout(resolve, 1000 * (retryCount + 1)));
             return await sendToTelegram(formData, apiEndpoint, env, retryCount + 1);
